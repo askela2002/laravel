@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('country', 100)->nullable();
             $table->string('city', 100)->nullable();
             $table->string('phone',30)->nullable();
-            $table->integer('role_id')->default(0);
+            $table->string('role')->default("worker");
             $table->string('api_token')->nullable();
 
 
