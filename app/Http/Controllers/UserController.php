@@ -12,22 +12,26 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $this->authorize('viewAny', User::class);
+        $search = $request->search;
+
+        if ($search) {
+            $users = User::where('first_name', 'like', '%' . $search . '%')
+                ->orWhere('last_name', 'like', '%' . $search . '%')
+                ->orWhere('country', 'like', '%' . $search . '%')
+                ->orWhere('city', 'like', '%' . $search . '%')
+                ->get();
+        } else {
+            $users = User::all();
+        }
+        return response()->json(["success" => "true", "data" => $users], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -37,7 +41,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
     }
 
     /**
@@ -49,19 +53,10 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::find($id);
-
-//        dd(\Auth::user());
-
-
-        $this->authorize('view', User::find(1));
-
-        return $user;
+        $this->authorize('view', $user);
 
 
-//        $this->authorize('show', User::class);
-//
-//        $user = User::find($id);
-//        return response()->json(["success" => "true", "data" => $user], 200);
+        return response()->json(["success" => "true", "data" => $user], 200);
     }
 
     /**
@@ -84,7 +79,12 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = User::find($id);
+
+        $this->authorize('update', $user);
+        $user->update($request->all());
+
+        return response()->json(["success" => "true", "data" => User::find($id)], 201);
     }
 
     /**
@@ -95,6 +95,12 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $user=User::find($id);
+        $this->authorize('delete', $user);
+        $user->api_token = Null;
+        $user->save();
+        $user->delete();
+
+        return response('', 204);
     }
 }

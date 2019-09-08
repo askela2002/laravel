@@ -15,14 +15,15 @@ class CreateVacanciesTable extends Migration
     {
         Schema::create('vacancies', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
-            $table->integer('workers');
-            $table->integer('company_id')->unsigned();
+            $table->string('vacancy_name');
+            $table->integer('workers_amount');
+            $table->integer('organization_id')->unsigned();
             $table->integer('salary');
 
+            $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('company_id')->references('id')->on('companies');
+            $table->foreign('organization_id')->references('id')->on('organizations');
         });
     }
 
@@ -35,7 +36,7 @@ class CreateVacanciesTable extends Migration
     {
         Schema::table('vacancies', function (Blueprint $table) {
 
-            $table->dropForeign(['company_id']);
+            $table->dropForeign(['organization_id']);
 
             $table->dropIfExists('vacancies');
         });

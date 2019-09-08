@@ -15,9 +15,23 @@ class UsersTableSeeder extends Seeder
         DB::table('users')->insert([
             'email' => 'admin@localhost',
             'password' => bcrypt('123456'),
-            'role' => 'admin'
+            'role' => 'admin',
+            'created_at' => now()
         ]);
 
-        $users = factory(App\User::class, 100)->create();
+//        factory(App\User::class, 100)->create()->each(function($user){
+//            if ($user->role === "employer"){
+//                factory(App\Company::class)->create();
+//            }
+//        });
+
+        factory(App\User::class, 50)->create(['role' => 'employer'])->each(function($user){
+            factory(App\Organization::class, rand (1, 4))->create(['user_id' => $user->id])->each(function($organization){
+                factory(App\Vacancy::class, rand(0,2))->create(['organization_id' => $organization->id]);
+            });
+        });
+
+        factory(App\User::class, 50)->create(['role' => 'worker']);
+
     }
 }

@@ -51,9 +51,6 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'email' => 'required|string|email|max:255|unique:users',
-
-//            'email' => ['required','string','max:255','unique:users','regex:/[a-zA-Z0-9_\\.\\+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-\\.]+/i'],
-
             'password' => 'required|string|min:6|max:20',
             'first_name' => 'string|max:20',
             'last_name' => 'string|max:40',
@@ -80,7 +77,7 @@ class RegisterController extends Controller
             'city' => array_key_exists('city', $data) ? $data['city'] : Null,
             'phone' => array_key_exists('phone', $data) ? $data['phone'] : Null,
             'role' => array_key_exists('role', $data) ? $data['role'] : 0
-//            ,'api_token',
+//            ,'api_token' => Null
         ]);
     }
 

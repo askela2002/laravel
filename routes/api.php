@@ -21,4 +21,15 @@ Route::post('register', 'Auth\RegisterController@register');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout');
 
-Route::get('user/{id}', 'UserController@show');
+
+Route::middleware('auth:api')->get('user/{id}', 'UserController@show');
+Route::middleware('auth:api')->get('user', 'UserController@index');
+Route::middleware('auth:api')->put('user/{id}', 'UserController@update');
+Route::middleware('auth:api')->delete('user/{id}', 'UserController@destroy');
+
+
+Route::middleware('auth:api')->get('organization', 'OrganizationController@index');
+Route::middleware('auth:api')->post('organization', 'OrganizationController@store');
+Route::middleware('auth:api')->get('organization/{id}', 'OrganizationController@show');
+Route::middleware('auth:api')->put('organization/{id}', 'OrganizationController@update');
+Route::middleware('auth:api')->delete('organization/{id}', 'OrganizationController@destroy');
