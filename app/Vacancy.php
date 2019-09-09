@@ -8,5 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Vacancy extends Model
 {
     use SoftDeletes;
-    //
+
+
+    protected $fillable = [
+        'vacancy_name', 'workers_amount', 'organization_id', 'salary'
+    ];
 }

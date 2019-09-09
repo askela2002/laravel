@@ -33,3 +33,9 @@ Route::middleware('auth:api')->post('organization', 'OrganizationController@stor
 Route::middleware('auth:api')->get('organization/{id}', 'OrganizationController@show');
 Route::middleware('auth:api')->put('organization/{id}', 'OrganizationController@update');
 Route::middleware('auth:api')->delete('organization/{id}', 'OrganizationController@destroy');
+
+
+Route::middleware('auth:api')->get('vacancy', 'VacancyController@index');
+Route::middleware('auth:api')->post('vacancy', 'VacancyController@store');
+Route::middleware('auth:api')->get('vacancy/{id}', 'VacancyController@show');
+Route::middleware('auth:api')->put('vacancy/{id}', 'VacancyController@update');

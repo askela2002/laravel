@@ -57,11 +57,11 @@ class OrganizationController extends Controller
 
         $this->authorize('create', Organization::class);
 
-        $Organization = $request->all();
-        $Organization['user_id'] = Auth::id();
-        Organization::create($Organization);
+        $organization = $request->all();
+        $organization['user_id'] = Auth::id();
+        Organization::create($organization);
 
-        return response()->json($Organization, 201);
+        return response()->json($organization, 201);
     }
 
     /**
