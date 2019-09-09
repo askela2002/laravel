@@ -109,12 +109,12 @@ class VacancyController extends Controller
         $vacancy=Vacancy::find($id);
 
 
-
-        if($user->role === 'admin'){
+        if($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)){
             $vacancy->update($request->all());
 
             return response()->json(["success" => "true", "data" => Vacancy::find($id)], 201);
         }
+
 
     }
 
@@ -126,6 +126,19 @@ class VacancyController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this->authorize('delete', Vacancy::class);
+
+        $user=Auth::user();
+        $vacancy=Vacancy::find($id);
+
+
+        if($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)){
+            $vacancy->delete();
+
+            return response('', 204);
+        }
+
+        return response()->json(["success" => "false", "data" => 'Nothing was deleted!'], 400);
+
     }
 }

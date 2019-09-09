@@ -39,3 +39,8 @@ Route::middleware('auth:api')->get('vacancy', 'VacancyController@index');
 Route::middleware('auth:api')->post('vacancy', 'VacancyController@store');
 Route::middleware('auth:api')->get('vacancy/{id}', 'VacancyController@show');
 Route::middleware('auth:api')->put('vacancy/{id}', 'VacancyController@update');
+Route::middleware('auth:api')->delete('vacancy/{id}', 'VacancyController@destroy');
+
+
+Route::middleware('auth:api')->post('vacancy-book', 'BookingController@book');
+Route::middleware('auth:api')->post('vacancy-unbook', 'BookingController@unbook');

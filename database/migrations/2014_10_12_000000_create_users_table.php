@@ -19,14 +19,14 @@ class CreateUsersTable extends Migration
 
             $table->string('email')->unique();
             $table->string('api_token')->nullable();
-
+            $table->string('role')->default("worker");
             $table->string('password');
             $table->string('first_name',20)->nullable();
             $table->string('last_name', 40)->nullable();
             $table->string('country', 100)->nullable();
             $table->string('city', 100)->nullable();
             $table->string('phone',30)->nullable();
-            $table->string('role')->default("worker");
+
 
 
             $table->softDeletes();

@@ -68,7 +68,7 @@ class VacancyPolicy
      */
     public function update(User $user)
     {
-        if ($user->role === 'admin'){
+        if ($user->role === 'admin' || $user->role === 'employer'){
             return true;
         }
 
@@ -82,9 +82,13 @@ class VacancyPolicy
      * @param  \App\Vacancy  $vacancy
      * @return mixed
      */
-    public function delete(User $user, Vacancy $vacancy)
+    public function delete(User $user)
     {
-        //
+        if ($user->role === 'admin' || $user->role === 'employer'){
+            return true;
+        }
+
+        return false;
     }
 
     /**
