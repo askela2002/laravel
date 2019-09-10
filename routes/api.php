@@ -13,34 +13,35 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 Route::post('register', 'Auth\RegisterController@register');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout');
 
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'user'], function () {
+        Route::get('{id}', 'UserController@show');
+        Route::get('', 'UserController@index');
+        Route::put('{id}', 'UserController@update');
+        Route::delete('{id}', 'UserController@destroy');
+    });
 
-Route::middleware('auth:api')->get('user/{id}', 'UserController@show');
-Route::middleware('auth:api')->get('user', 'UserController@index');
-Route::middleware('auth:api')->put('user/{id}', 'UserController@update');
-Route::middleware('auth:api')->delete('user/{id}', 'UserController@destroy');
+    Route::group(['prefix' => 'organization'], function () {
+        Route::get('', 'OrganizationController@index');
+        Route::post('', 'OrganizationController@store');
+        Route::get('{id}', 'OrganizationController@show');
+        Route::put('{id}', 'OrganizationController@update');
+        Route::delete('{id}', 'OrganizationController@destroy');
+    });
 
+    Route::group(['prefix' => 'vacancy'], function () {
+        Route::get('', 'VacancyController@index');
+        Route::post('', 'VacancyController@store');
+        Route::get('{id}', 'VacancyController@show');
+        Route::put('{id}', 'VacancyController@update');
+        Route::delete('{id}', 'VacancyController@destroy');
+    });
 
-Route::middleware('auth:api')->get('organization', 'OrganizationController@index');
-Route::middleware('auth:api')->post('organization', 'OrganizationController@store');
-Route::middleware('auth:api')->get('organization/{id}', 'OrganizationController@show');
-Route::middleware('auth:api')->put('organization/{id}', 'OrganizationController@update');
-Route::middleware('auth:api')->delete('organization/{id}', 'OrganizationController@destroy');
-
-
-Route::middleware('auth:api')->get('vacancy', 'VacancyController@index');
-Route::middleware('auth:api')->post('vacancy', 'VacancyController@store');
-Route::middleware('auth:api')->get('vacancy/{id}', 'VacancyController@show');
-Route::middleware('auth:api')->put('vacancy/{id}', 'VacancyController@update');
-Route::middleware('auth:api')->delete('vacancy/{id}', 'VacancyController@destroy');
-
-
-Route::middleware('auth:api')->post('vacancy-book', 'BookingController@book');
-Route::middleware('auth:api')->post('vacancy-unbook', 'BookingController@unbook');
+    Route::post('vacancy-book', 'VacancyController@book');
+    Route::post('vacancy-unbook', 'VacancyController@unbook');
+});

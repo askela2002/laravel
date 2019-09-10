@@ -4,11 +4,34 @@ namespace App\Policies;
 
 use App\User;
 use App\Vacancy;
+use http\Env\Request;
 use Illuminate\Auth\Access\HandlesAuthorization;
+
 
 class VacancyPolicy
 {
     use HandlesAuthorization;
+
+
+
+    public function book(User $user, User $model)
+    {
+        if ($user->role === 'worker' && $user->id === $model->id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function unbook(User $user)
+    {
+
+        if ($user->role === 'worker') {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Determine whether the user can view the vacancy.

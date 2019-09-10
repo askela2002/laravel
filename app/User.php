@@ -42,4 +42,9 @@ class User extends Authenticatable
         $this->save();
         return $this->api_token;
     }
+
+    public function vacancies()
+    {
+        return $this->belongsToMany(Vacancy::class, 'user_vacancy');
+    }
 }

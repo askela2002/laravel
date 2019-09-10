@@ -13,4 +13,9 @@ class Vacancy extends Model
     protected $fillable = [
         'vacancy_name', 'workers_amount', 'organization_id', 'salary'
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_vacancy');
+    }
 }

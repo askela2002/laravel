@@ -3,12 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Organization;
+use App\User;
 use App\Vacancy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class VacancyController extends Controller
 {
+    public function book(Request $request)
+    {
+        $user = User::find($request->user_id);
+
+        $this->authorize('book', [Vacancy::class, $user]);
+
+        $vacancy = Vacancy::find($request->vacancy_id);
+
+
+        if ($vacancy && $user) {
+
+
+
+            $workers_amount = $vacancy->workers_amount;
+
+            $bookings_amount = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->count();
+
+            if ($workers_amount > $bookings_amount) {
+
+                $user->vacancies()->attach($vacancy);
+
+                return response()->json(["success" => true, 'data' => 'Booking has been added!'], 200);
+            } else {
+                return response()->json(["success" => false, 'data' => 'There are no vacancies available!'], 400);
+            }
+        } else{
+            return response()->json(["success" => false, 'data' => 'There is no such user or such vacancy!'], 400);
+        }
+
+    }
+
+
+    public function unbook(Request $request)
+    {
+
+        $user = Auth::user();
+        $vacancy = Vacancy::find($request->vacancy_id);
+
+
+        if (($user->id === $request->user_id || $user->role === 'admin') && $vacancy) {
+
+            $user->vacancies()->detach($vacancy);
+
+            return response()->json(["success" => true, 'data' => 'Booking has been deleted!'], 200);
+        }
+
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -105,11 +156,11 @@ class VacancyController extends Controller
 
         $this->authorize('update', Vacancy::class);
 
-        $user=Auth::user();
-        $vacancy=Vacancy::find($id);
+        $user = Auth::user();
+        $vacancy = Vacancy::find($id);
 
 
-        if($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)){
+        if ($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)) {
             $vacancy->update($request->all());
 
             return response()->json(["success" => "true", "data" => Vacancy::find($id)], 201);
@@ -128,11 +179,11 @@ class VacancyController extends Controller
     {
         $this->authorize('delete', Vacancy::class);
 
-        $user=Auth::user();
-        $vacancy=Vacancy::find($id);
+        $user = Auth::user();
+        $vacancy = Vacancy::find($id);
 
 
-        if($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)){
+        if ($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)) {
             $vacancy->delete();
 
             return response('', 204);
