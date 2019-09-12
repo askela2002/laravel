@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Organization;
 use App\Policies\OrganizationPolicy;
+use App\Policies\StatPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\VacancyPolicy;
 use App\Vacancy;
@@ -24,7 +25,8 @@ class AuthServiceProvider extends ServiceProvider
 //        'App\Organization' => 'App\Policies\OrganizationPolicy',
         User::class => UserPolicy::class,
         Organization::class => OrganizationPolicy::class,
-        Vacancy::class => VacancyPolicy::class
+        Vacancy::class => VacancyPolicy::class,
+        StatPolicy::class => StatPolicy::class
     ];
 
     /**

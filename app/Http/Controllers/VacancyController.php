@@ -22,8 +22,6 @@ class VacancyController extends Controller
 
         if ($vacancy && $user) {
 
-
-
             $workers_amount = $vacancy->workers_amount;
 
             $bookings_amount = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->count();
@@ -36,7 +34,7 @@ class VacancyController extends Controller
             } else {
                 return response()->json(["success" => false, 'data' => 'There are no vacancies available!'], 400);
             }
-        } else{
+        } else {
             return response()->json(["success" => false, 'data' => 'There is no such user or such vacancy!'], 400);
         }
 
@@ -45,16 +43,21 @@ class VacancyController extends Controller
 
     public function unbook(Request $request)
     {
+        $user = User::find($request->user_id);
 
-        $user = Auth::user();
+        $this->authorize('unbook', [Vacancy::class, $user]);
+
         $vacancy = Vacancy::find($request->vacancy_id);
 
+        $booking_exist = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->where('user_id', $user->id)->count();
 
-        if (($user->id === $request->user_id || $user->role === 'admin') && $vacancy) {
+        if ($booking_exist === 1) {
 
             $user->vacancies()->detach($vacancy);
 
             return response()->json(["success" => true, 'data' => 'Booking has been deleted!'], 200);
+        } else {
+            return response()->json(["success" => false, 'data' => 'There is no such user or such vacancy!'], 400);
         }
 
     }

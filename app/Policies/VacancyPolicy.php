@@ -23,14 +23,15 @@ class VacancyPolicy
         return false;
     }
 
-    public function unbook(User $user)
+    public function unbook(User $user, User $model)
     {
 
-        if ($user->role === 'worker') {
+        if ($user->role === 'worker' && $user->id === $model->id) {
             return true;
         }
 
         return false;
+
     }
 
     /**
