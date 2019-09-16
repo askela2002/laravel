@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Organization;
+use App\Vacancy;
 use Illuminate\Http\Request;
 
 use App\User;
+use Illuminate\Support\Facades\DB;
 
 
 class UserController extends Controller
@@ -53,6 +56,7 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::find($id);
+
         $this->authorize('view', $user);
 
 
@@ -82,6 +86,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         $this->authorize('update', $user);
+
         $user->update($request->all());
 
         return response()->json(["success" => "true", "data" => User::find($id)], 201);
@@ -95,12 +100,25 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user=User::find($id);
+        $user = User::find($id);
         $this->authorize('delete', $user);
         $user->api_token = Null;
         $user->save();
-        $user->delete();
 
-        return response('', 204);
+        $organizations = Organization::where('user_id', $id)->get();
+
+        foreach ($organizations as $organization) {
+            $vacancies = Vacancy::where('organization_id', $organization->id)->get();
+
+            foreach ($vacancies as $vacancy) {
+                DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->delete();
+            }
+            $vacancies->each->delete();
+        }
+
+        DB::table('user_vacancy')->where('user_id', $user->id)->delete();
+        $organizations->each->delete();
+        $user->delete();
+        return response('', 200);
     }
 }

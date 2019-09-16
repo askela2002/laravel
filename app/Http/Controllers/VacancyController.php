@@ -75,12 +75,22 @@ class VacancyController extends Controller
 
         $this->authorize('viewAny', Vacancy::class);
 
+        $vacancies = Vacancy::all();
+        $vacancies_active = [];
+
         if ($user->role === 'admin' && $request->only_active === "false") {
-            $vacancies = Vacancy::all();
+
             return response()->json(["success" => "true", "data" => $vacancies], 200);
         } else {
-            $vacancies = Vacancy::where('workers_amount', '>', 0)->get();
-            return response()->json(["success" => "true", "data" => $vacancies], 200);
+            foreach ($vacancies as $vacancy) {
+                $places_booked = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->count();
+
+                if ($vacancy->workers_amount > $places_booked) {
+                    array_push($vacancies_active, $vacancy);
+                }
+            }
+
+            return response()->json(["success" => "true", "data" => $vacancies_active], 200);
         }
 
 
@@ -104,20 +114,13 @@ class VacancyController extends Controller
      */
     public function store(Request $request)
     {
-        $user = Auth::user();
-        $this->authorize('create', Vacancy::class);
+        $organization_id = $request->organization_id;
 
-        $organizations = Organization::where('user_id', $user->id)->get();
+        $this->authorize('create', [Vacancy::class, $organization_id]);
 
-        foreach ($organizations as $organization) {
-            if ($request->organization_id === $organization->id) {
-                $vacancy = Vacancy::create($request->all());
+        $vacancy = Vacancy::create($request->all());
 
-                return response()->json(['success' => true, 'data' => $vacancy], 201);
-            }
-        }
-
-        return response()->json(['success' => false, 'data' => 'You don`t own this organization!'], 400);
+        return response()->json(['success' => true, 'data' => $vacancy], 201);
     }
 
     /**

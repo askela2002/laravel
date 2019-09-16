@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use App\Organization;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrganizationController extends Controller
 {
@@ -24,14 +25,13 @@ class OrganizationController extends Controller
 
         $this->authorize('viewAny', Organization::class);
 
-        if($user->role === 'admin') {
+        if ($user->role === 'admin') {
             $organizations = Organization::all();
             return response()->json(["success" => "true", "data" => $organizations], 200);
-        } else if($user->role === 'employer'){
+        } else if ($user->role === 'employer') {
             $organizations = Organization::where('user_id', $user->id)->get();
             return response()->json(["success" => "true", "data" => $organizations], 200);
         }
-
 
 
     }
@@ -61,7 +61,7 @@ class OrganizationController extends Controller
         $organization['user_id'] = Auth::id();
         Organization::create($organization);
 
-        return response()->json($organization, 201);
+        return response()->json(['success' => true, 'data' => $organization], 201);
     }
 
     /**
@@ -70,21 +70,60 @@ class OrganizationController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $user = Auth::user();
+        $organization = Organization::find($id);
 
-        $this->authorize('view', Organization::class);
+        $this->authorize('view', [Organization::class, $organization]);
 
-        if($user->role === 'admin') {
-            $organizations = Organization::find($id);
-            return response()->json(["success" => "true", "data" => $organizations], 200);
-        } else if($user->role === 'employer'){
-            $organizations = Organization::where('id', $id)->where('user_id', $user->id)->get();
-            return response()->json(["success" => "true", "data" => $organizations], 200);
+        $data = $organization;
+        $data->creator = User::find($organization->user_id);
+
+        if ($request->vacancies === "1" || $request->vacancies === "2" || $request->vacancies === "3" || $request->workers === "1") {
+
+            $vacancies = Vacancy::where('organization_id', $organization->id)->get();
+
+            $workers = [];
+            $vacancies_active = [];
+            $vacancies_closed = [];
+
+            foreach ($vacancies as $vacancy) {
+
+                $db_request = DB::select('select user_id from user_vacancy where vacancy_id = :vacancy_id', ['vacancy_id' => $vacancy->id]);
+
+                if ($request->vacancies === "1" || $request->vacancies === "2" || $request->vacancies === "3") {
+
+                    $places_booked = count($db_request);
+
+                    $vacancy->wokers_booked = $places_booked;
+
+                    if ($vacancy->workers_amount > $places_booked) {
+                        $vacancy->status = 'active';
+                        array_push($vacancies_active, $vacancy);
+                    } else {
+                        $vacancy->status = 'closed';
+                        array_push($vacancies_closed, $vacancy);
+                    }
+
+                    if ($request->vacancies === "3") {
+                        $data->vacancies = array_merge($vacancies_closed, $vacancies_active);
+                    } elseif ($request->vacancies === "2") {
+                        $data->vacancies = $vacancies_closed;
+                    } elseif ($request->vacancies === "1") {
+                        $data->vacancies = $vacancies_active;
+                    }
+                }
+
+                if ($request->workers === "1") {
+                    foreach ($db_request as $worker) {
+                        array_push($workers, User::find($worker->user_id));
+                    }
+                    $data->workers = $workers;
+                }
+            }
         }
 
-
+        return response()->json(["success" => "true", "data" => $data], 200);
     }
 
     /**
@@ -107,7 +146,7 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $organization=Organization::find($id);
+        $organization = Organization::find($id);
 
         $this->authorize('update', $organization);
 
@@ -124,11 +163,19 @@ class OrganizationController extends Controller
      */
     public function destroy($id)
     {
-        $organization=Organization::find($id);
-        $this->authorize('delete', $organization);
+        $organization = Organization::find($id);
 
-        Organization::find($id)->delete();
-        Vacancy::where('organization_id', $organization->id)->delete();
+        $this->authorize('delete', [Organization::class, $organization]);
+
+        $vacancies = Vacancy::where('organization_id', $organization->id)->get();
+
+        foreach ($vacancies as $vacancy){
+            DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->delete();
+        }
+
+        $organization->delete();
+        $vacancies->each->delete();
+
         return response('', 204);
     }
 }

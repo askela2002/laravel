@@ -30,9 +30,9 @@ class OrganizationPolicy
      * @param \App\User $user
      * @return mixed
      */
-    public function view(User $user)
+    public function view(User $user, Organization $organization)
     {
-        if ($user->role === 'admin' || $user->role === 'employer') {
+        if ($user->role === 'admin' || ($user->role === 'employer' && $user->id === $organization->user_id)) {
             return true;
         }
         return false;

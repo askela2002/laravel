@@ -76,8 +76,7 @@ class RegisterController extends Controller
             'country' => array_key_exists('country', $data) ? $data['country'] : Null,
             'city' => array_key_exists('city', $data) ? $data['city'] : Null,
             'phone' => array_key_exists('phone', $data) ? $data['phone'] : Null,
-            'role' => array_key_exists('role', $data) ? $data['role'] : 0
-//            ,'api_token' => Null
+            'role' => array_key_exists('role', $data) ? $data['role'] : 'worker'
         ]);
     }
 

@@ -46,8 +46,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('vacancy-unbook', 'VacancyController@unbook');
 
     Route::group(['prefix' => 'stats'], function (){
-       Route::get('vacancy', 'StatController@vacancy');
-       Route::get('organisation', 'StatController@organisation');
-       Route::get('user', 'StatController@user');
+       Route::get('vacancy', 'StatController@vacancies');
+       Route::get('organization', 'StatController@organizations');
+       Route::get('user', 'StatController@users');
     });
 });
