@@ -187,12 +187,17 @@ class VacancyController extends Controller
     public function destroy($id)
     {
         $vacancy = Vacancy::find($id);
-        $this->authorize('delete', [Vacancy::class, $vacancy]);
 
-        DB::table('user_vacancy')->where('vacancy_id',$vacancy->id)->update(array('deleted_at' => DB::raw('NOW()')));
+        if ($vacancy) {
+            $this->authorize('delete', [Vacancy::class, $vacancy]);
 
-        $vacancy->delete();
+            DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->update(array('deleted_at' => DB::raw('NOW()')));
 
-        return response('', 204);
+            $vacancy->delete();
+
+            return response('', 204);
+        } else{
+            return response()->json(['success' => false, 'data'=>'There is no such vacation'], 400);
+        }
     }
 }
