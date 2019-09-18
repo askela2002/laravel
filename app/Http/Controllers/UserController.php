@@ -87,7 +87,10 @@ class UserController extends Controller
 
         $this->authorize('update', $user);
 
-        $user->update($request->all());
+        $data = $request->all();
+        $data['password'] = bcrypt($request->password);
+
+        $user->update($data);
 
         return response()->json(["success" => "true", "data" => User::find($id)], 201);
     }

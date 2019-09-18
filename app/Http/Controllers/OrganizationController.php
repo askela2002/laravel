@@ -24,15 +24,14 @@ class OrganizationController extends Controller
         $user = Auth::user();
 
         $this->authorize('viewAny', Organization::class);
-
+        $organizations = [];
         if ($user->role === 'admin') {
             $organizations = Organization::all();
-            return response()->json(["success" => "true", "data" => $organizations], 200);
         } else if ($user->role === 'employer') {
             $organizations = Organization::where('user_id', $user->id)->get();
-            return response()->json(["success" => "true", "data" => $organizations], 200);
         }
 
+        return response()->json(["success" => "true", "data" => $organizations], 200);
 
     }
 
@@ -169,7 +168,7 @@ class OrganizationController extends Controller
 
         $vacancies = Vacancy::where('organization_id', $organization->id)->get();
 
-        foreach ($vacancies as $vacancy){
+        foreach ($vacancies as $vacancy) {
             DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->delete();
         }
 
