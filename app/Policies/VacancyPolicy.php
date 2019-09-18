@@ -93,9 +93,10 @@ class VacancyPolicy
      * @param \App\Vacancy $vacancy
      * @return mixed
      */
-    public function update(User $user)
+    public function update(User $user, Vacancy $vacancy)
     {
-        if ($user->role === 'admin' || $user->role === 'employer') {
+        $user_id = Organization::find($vacancy->organization_id)->user_id;
+        if ($user->role === 'admin' || $user->role === 'employer' && $user->id === $user_id) {
             return true;
         }
 
@@ -109,9 +110,10 @@ class VacancyPolicy
      * @param \App\Vacancy $vacancy
      * @return mixed
      */
-    public function delete(User $user)
+    public function delete(User $user, Vacancy $vacancy)
     {
-        if ($user->role === 'admin' || $user->role === 'employer') {
+        $user_id = Organization::find($vacancy->organization_id)->user_id;
+        if ($user->role === 'admin' || $user->role === 'employer' && $user->id === $user_id) {
             return true;
         }
 

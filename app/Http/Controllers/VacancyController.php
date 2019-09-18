@@ -19,14 +19,11 @@ class VacancyController extends Controller
 
         $vacancy = Vacancy::find($request->vacancy_id);
 
-
         if ($vacancy && $user) {
-
-            $workers_amount = $vacancy->workers_amount;
 
             $bookings_amount = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->count();
 
-            if ($workers_amount > $bookings_amount) {
+            if ($vacancy->workers_amount > $bookings_amount) {
 
                 $user->vacancies()->attach($vacancy);
 
@@ -49,7 +46,7 @@ class VacancyController extends Controller
 
         $vacancy = Vacancy::find($request->vacancy_id);
 
-        $booking_exist = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->where('user_id', $user->id)->count();
+        $booking_exist = DB::table('user_vacancy')->where('vacancy_id', $request->vacancy_id)->where('user_id', $request->user_id)->count();
 
         if ($booking_exist === 1) {
 
@@ -133,7 +130,20 @@ class VacancyController extends Controller
     {
         $this->authorize('view', Vacancy::class);
 
+        $user = Auth::user();
+
+        $workers_id = DB::table('user_vacancy')->where("vacancy_id", $id)->get();
+        $workers = [];
+
+        foreach ($workers_id as $worker) {
+            array_push($workers, User::find($worker->user_id));
+        }
+
         $vacancy = Vacancy::find($id);
+
+        if ($user->role === "admin" || $user->role === "employer") {
+            $vacancy->workers = $workers;
+        }
 
         return response()->json(['success' => true, 'data' => $vacancy], 200);
 
@@ -159,20 +169,13 @@ class VacancyController extends Controller
      */
     public function update(Request $request, $id)
     {
-
-        $this->authorize('update', Vacancy::class);
-
-        $user = Auth::user();
         $vacancy = Vacancy::find($id);
 
+        $this->authorize('update', [Vacancy::class, $vacancy]);
 
-        if ($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)) {
-            $vacancy->update($request->all());
+        $vacancy->update($request->all());
 
-            return response()->json(["success" => "true", "data" => Vacancy::find($id)], 201);
-        }
-
-
+        return response()->json(["success" => "true", "data" => Vacancy::find($id)], 201);
     }
 
     /**
@@ -183,19 +186,13 @@ class VacancyController extends Controller
      */
     public function destroy($id)
     {
-        $this->authorize('delete', Vacancy::class);
-
-        $user = Auth::user();
         $vacancy = Vacancy::find($id);
+        $this->authorize('delete', [Vacancy::class, $vacancy]);
 
+        DB::table('user_vacancy')->where('vacancy_id',$vacancy->id)->delete();
 
-        if ($user->role === 'admin' || ($user->role === 'employer' && $user->id === Organization::find($vacancy->organization_id)->user_id)) {
-            $vacancy->delete();
+        $vacancy->delete();
 
-            return response('', 204);
-        }
-
-        return response()->json(["success" => "false", "data" => 'Nothing was deleted!'], 400);
-
+        return response('', 204);
     }
 }
