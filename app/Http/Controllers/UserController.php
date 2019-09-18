@@ -114,12 +114,12 @@ class UserController extends Controller
             $vacancies = Vacancy::where('organization_id', $organization->id)->get();
 
             foreach ($vacancies as $vacancy) {
-                DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->delete();
+                DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->update(array('deleted_at' => DB::raw('NOW()')));;
             }
             $vacancies->each->delete();
         }
 
-        DB::table('user_vacancy')->where('user_id', $user->id)->delete();
+        DB::table('user_vacancy')->where('user_id', $user->id)->update(array('deleted_at' => DB::raw('NOW()')));;
         $organizations->each->delete();
         $user->delete();
         return response('', 200);

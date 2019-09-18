@@ -189,7 +189,7 @@ class VacancyController extends Controller
         $vacancy = Vacancy::find($id);
         $this->authorize('delete', [Vacancy::class, $vacancy]);
 
-        DB::table('user_vacancy')->where('vacancy_id',$vacancy->id)->delete();
+        DB::table('user_vacancy')->where('vacancy_id',$vacancy->id)->update(array('deleted_at' => DB::raw('NOW()')));
 
         $vacancy->delete();
 

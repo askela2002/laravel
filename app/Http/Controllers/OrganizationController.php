@@ -169,7 +169,7 @@ class OrganizationController extends Controller
         $vacancies = Vacancy::where('organization_id', $organization->id)->get();
 
         foreach ($vacancies as $vacancy) {
-            DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->delete();
+            DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->update(array('deleted_at' => DB::raw('NOW()')));;
         }
 
         $organization->delete();

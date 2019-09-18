@@ -21,7 +21,7 @@ class CreateUserVacancyTable extends Migration
 //                ->onDelete('cascade');
 //            $table->foreign('vacancy_id')->references('id')->on('vacancies')
 //                ->onDelete('cascade');
-
+            $table->softDeletes();
             $table->unique(['user_id', 'vacancy_id']);
         });
     }
