@@ -21,7 +21,7 @@ class VacancyController extends Controller
 
         if ($vacancy && $user) {
 
-            $bookings_amount = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->count();
+            $bookings_amount = $vacancy->users()->count();
 
             if ($vacancy->workers_amount > $bookings_amount) {
 
@@ -46,7 +46,7 @@ class VacancyController extends Controller
 
         $vacancy = Vacancy::find($request->vacancy_id);
 
-        $booking_exist = DB::table('user_vacancy')->where('vacancy_id', $request->vacancy_id)->where('user_id', $request->user_id)->count();
+        $booking_exist = $vacancy->users()->count();
 
         if ($booking_exist === 1) {
 
@@ -79,8 +79,9 @@ class VacancyController extends Controller
 
             return response()->json(["success" => "true", "data" => $vacancies], 200);
         } else {
+
             foreach ($vacancies as $vacancy) {
-                $places_booked = DB::table('user_vacancy')->where('vacancy_id', $vacancy->id)->count();
+                $places_booked = $vacancy->users()->count();
 
                 if ($vacancy->workers_amount > $places_booked) {
                     array_push($vacancies_active, $vacancy);
